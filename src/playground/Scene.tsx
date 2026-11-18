@@ -104,11 +104,13 @@ interface SceneProps {
   stickers: StickerState[];
   draggingId?: string | null;
   onStickerPointerDown?: (id: string, e: ReactPointerEvent<HTMLDivElement>) => void;
+  /** Scales sticker spread for narrow viewports. Default `1`. */
+  layoutScale?: number;
 }
 
-export function Scene({ heading = true, stickers, draggingId, onStickerPointerDown }: SceneProps) {
+export function Scene({ heading = true, stickers, draggingId, onStickerPointerDown, layoutScale = 1 }: SceneProps) {
   return (
-    <div className={`scene${heading ? '' : ' no-heading'}`}>
+    <div className={`scene${heading ? '' : ' no-heading'}`} style={{ ['--scene-scale' as string]: layoutScale }}>
       {heading && (
         <header className="scene-head">
           <span className="eyebrow">PLAYGROUND</span>

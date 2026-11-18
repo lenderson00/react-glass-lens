@@ -85,7 +85,7 @@ export function Docs() {
   const active = useActiveSection();
   return (
     <div className="docs">
-      <aside className="toc" aria-label="On this page">
+      <aside className="toc toc-desktop" aria-label="On this page">
         <span className="toc-title">Documentation</span>
         <nav>
           {SECTIONS.map(([id, label]) => (
@@ -95,6 +95,18 @@ export function Docs() {
           ))}
         </nav>
       </aside>
+
+      <div className="docs-main">
+        <div className="toc-rail-wrap" aria-hidden={false}>
+          <span className="toc-rail-label">On this page</span>
+          <nav className="toc-rail" aria-label="On this page">
+            {SECTIONS.map(([id, label]) => (
+              <a key={id} href={href('docs', id)} className={active === id ? 'on' : ''}>
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
 
       <article className="prose">
         <section id="introduction">
@@ -339,6 +351,7 @@ const [pos, setPos] = useState({ x: 200, y: 160 });
           </ul>
         </section>
       </article>
+      </div>
     </div>
   );
 }
