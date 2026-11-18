@@ -4,6 +4,8 @@ import react from '@vitejs/plugin-react';
 
 // The site imports the library from source, so edits show up instantly.
 export default defineConfig({
+  // GitHub Pages serves the site under /<repo>/ — the workflow sets BASE_PATH.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
   resolve: {
     alias: {
