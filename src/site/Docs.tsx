@@ -215,8 +215,8 @@ supportsHtmlInCanvas(); // feature detection
           <ul>
             <li>The lens follows animations, video and dragging at full frame rate — no recapture, no stale frames.</li>
             <li>
-              The API is experimental. At the time of writing it ships in Chromium behind a flag; in every other browser
-              the lens silently uses snapshot capture. If the API throws, it also falls back.
+              The API is experimental (Chromium, <code>CanvasDrawElement</code>). Other browsers and failures use snapshot
+              capture automatically.
             </li>
             <li>
               In this mode the canvas paints the content itself. Text selection and native scrolling inside the stage

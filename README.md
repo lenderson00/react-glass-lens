@@ -1,39 +1,33 @@
 <div align="center">
 
-# 🔍 react-glass-lens
+# react-glass-lens
 
-**Vidro de verdade pro DOM.**
-Uma lente arrastável que refrata o que o React renderiza embaixo dela — não é blur, não é `scale`, é raio de luz.
+Lente de vidro arrastável em WebGL2 para React. Refração por pixel no DOM abaixo, com dispersão cromática, presets e captura ao vivo via HTML-in-Canvas.
 
-[![demo](https://img.shields.io/badge/demo-ao%20vivo-111)](https://lenderson00.github.io/react-glass-lens/)
+**[Demo ao vivo](https://lenderson00.github.io/react-glass-lens/)**
+
 [![license](https://img.shields.io/badge/license-MIT-111)](LICENSE)
 ![WebGL2](https://img.shields.io/badge/WebGL2-111)
 ![TypeScript](https://img.shields.io/badge/TypeScript-111)
 
+![Arraste a lente nos presets crystal, liquid e orb](docs/assets/demo.gif)
+
 </div>
 
----
+## Visão geral
 
-## Por que isso existe
+`react-glass-lens` envolve seu conteúdo React em um palco com uma lente circular que refrata o que está embaixo. O efeito vem de um fragment shader WebGL2 que aplica a lei de Snell nas superfícies curva e plana de um domo de vidro, com amostragem espectral onde as cores se separam. Mover a lente custa essencialmente uma draw call; o DOM continua interativo.
 
-Todo mundo já viu aquele efeito de lupa de vidro em portfólio bonito: o centro amplia, a borda entorta, aparece uma
-franja colorida e o mundo vira de cabeça pra baixo perto da beirada. A maioria é imagem estática ou truque de CSS.
+## Recursos
 
-Eu queria **a coisa de verdade**, funcionando em cima de qualquer conteúdo React — texto, imagem, componente, o que for.
-Então o shader traça um raio de luz por pixel através de uma cúpula de vidro (lei de Snell nas duas superfícies),
-separa os comprimentos de onda onde as cores realmente se afastam e devolve isso a 60 fps.
-
-## O que tem
-
-- 🔬 **Refração real** — raio por pixel, não imagem ampliada com filtro.
-- 🌈 **Dispersão espectral** — franjas coloridas suaves, só onde as cores se separam.
-- 🧩 **Qualquer conteúdo React** — renderizado uma vez, estado/foco/cliques continuam funcionando.
-- ⚡ **60 fps** — mover a lente é uma draw call. Arrasta, arremessa com inércia, segue o cursor ou controla por código.
-- 🧊 **Vidro fosco** — `frost` desfoca o que passa pela lente.
-- 🪟 **Preset Liquid Glass** — vidro de UI no estilo do da Apple (sem zoom, centro limpo, refração só na borda).
-- 🧪 **HTML-in-Canvas** — modo experimental que mantém vídeo e animação **vivos** debaixo do vidro.
-- ♿ **Acessível** — foco visível, controle por setas, respeita `prefers-reduced-motion`.
-- 📦 **Tipado e pequeno** — TypeScript, ~13 kB gzip, ESM + CJS, uma dependência.
+- Refração física por pixel (não é blur nem `transform: scale`)
+- Dispersão cromática configurável (`aberration`, `spectralSamples`)
+- Qualquer conteúdo React no palco, com estado, foco e clique preservados
+- Modos `drag`, `follow` e `static`, com inércia e suavização
+- Seis presets: `crystal`, `orb`, `magnifier`, `droplet`, `subtle`, `liquid`
+- Vidro fosco (`frost`), sombra, Fresnel e luz direcional
+- Captura `snapshot` (compatível) ou `html-in-canvas` (pixels ao vivo, com fallback)
+- TypeScript, ~13 kB gzip, ESM + CJS
 
 ## Instalação
 
@@ -41,10 +35,7 @@ separa os comprimentos de onda onde as cores realmente se afastam e devolve isso
 npm i react-glass-lens
 ```
 
-React 18 ou 19.
-
-> ⚠️ O pacote **ainda não foi publicado no npm**. Até lá, clone o repositório e rode o site/playground
-> (veja [Documentação](#documentação)) — o código da lib está em `packages/react-glass-lens`.
+Peer dependencies: React 18 ou 19.
 
 ## Uso
 
@@ -60,7 +51,7 @@ export function Hero() {
 }
 ```
 
-O `LensStage` é um bloco `position: relative` — dê um tamanho a ele. Daí é só mexer nas props ou partir de um preset:
+`LensStage` é um contêiner `position: relative`. Defina altura/largura no palco. Props individuais sobrescrevem `config` (preset):
 
 ```tsx
 import { LensStage, lensPresets } from 'react-glass-lens';
@@ -70,96 +61,74 @@ import { LensStage, lensPresets } from 'react-glass-lens';
 </LensStage>;
 ```
 
-Ordem de precedência: padrões < `config` < props individuais.
-
 ### Presets
 
-| preset | cara dele |
+| Preset | Comportamento |
 | --- | --- |
-| `crystal` | o padrão: zoom, borda que dobra, franja colorida |
-| `orb` | bola de cristal — o mundo de cabeça pra baixo |
-| `magnifier` | lupa com centro plano e borda curta |
-| `droplet` | gota d'água, índice de refração 1.33 |
-| `subtle` | quase imperceptível, só uma insinuação |
-| `liquid` | vidro de UI no estilo Liquid Glass |
+| `crystal` | Padrão: zoom, borda curva, franja cromática |
+| `orb` | Esfera: inversão perto da borda |
+| `magnifier` | Lupa com centro plano |
+| `droplet` | Gota, IOR ~1.33 |
+| `subtle` | Refração discreta |
+| `liquid` | Vidro de UI, estilo Liquid Glass (sem afiliação Apple) |
 
-> O `liquid` é inspirado no visual do Liquid Glass da Apple. Sem afiliação nem endosso — "Apple" e "Liquid Glass" são
-> marcas dos respectivos donos.
+### Props principais
 
-### As props que mais importam
-
-| prop | padrão | o que faz |
+| Prop | Padrão | Descrição |
 | --- | --- | --- |
-| `radius` | `258` | raio da lente em px |
-| `magnification` | `1.75` | zoom no centro (exato) |
-| `ior` | `1.52` | índice de refração (1.33 água · 1.52 vidro · 2.4 diamante) |
-| `aberration` | `0.054` | dispersão cromática (`0` desliga) |
-| `thickness` | `0.6` | altura do domo ÷ raio |
-| `refraction` | `0.3` | distância vidro → conteúdo; quanto maior, mais a borda dobra |
-| `frost` | `0` | vidro fosco (0–1) |
-| `mode` | `'drag'` | `'drag'` · `'follow'` · `'static'` |
-| `capture` | `'snapshot'` | `'snapshot'` · `'html-in-canvas'` · `'auto'` |
-| `captureBudget` | `0.3` | quanto da thread principal as recapturas podem usar enquanto o conteúdo muda (menor = página mais fluida) |
+| `radius` | `258` | Raio da lente (px) |
+| `magnification` | `1.75` | Zoom no centro |
+| `ior` | `1.52` | Índice de refração |
+| `aberration` | `0.054` | Dispersão (0 desliga) |
+| `frost` | `0` | Desfoque interno (0 a 1) |
+| `mode` | `'drag'` | `drag` / `follow` / `static` |
+| `capture` | `'snapshot'` | `snapshot` / `html-in-canvas` / `auto` |
+| `captureBudget` | `0.3` | Cota de CPU no modo snapshot (0.05 a 0.9) |
 
-A lista completa (com tipos, callbacks e a API por `ref`) está na [documentação](#documentação).
+Tabela completa, callbacks e API imperativa: [documentação no site](https://lenderson00.github.io/react-glass-lens/#/docs).
 
 ## HTML-in-Canvas (experimental)
 
-Por padrão a lente tira um *snapshot* do conteúdo quando o DOM muda (~35–50 ms na thread principal). Com
-[HTML-in-Canvas](https://github.com/WICG/html-in-canvas) o palco vira um `<canvas content="drawable">` e o navegador
-manda os pixels vivos pro WebGL a cada frame:
+No modo padrão o palco é clonado para textura quando o DOM muda. Com a [proposta HTML-in-Canvas](https://github.com/WICG/html-in-canvas) o palco vira `<canvas content="drawable">`, filhos marcados com `drawable`, loop `requestPaint()` + evento `paint`, e upload via `texElementSubImage2D()` no WebGL2. A geometria de hit test é sincronizada com `updateElementGeometry()`.
 
 ```tsx
+import { LensStage, supportsHtmlInCanvas } from 'react-glass-lens';
+
 <LensStage capture="html-in-canvas">
-  <VideoWall /> {/* vídeo, canvas e animação CSS continuam vivos sob o vidro */}
-</LensStage>
+  <ConteudoAnimado />
+</LensStage>;
+
+supportsHtmlInCanvas(); // feature detection
 ```
 
-Fica honesto aqui: a API ainda é experimental (Chromium, atrás de flag). Onde ela não existe — ou se falhar — a lente
-volta sozinha pro snapshot. **Eu implementei seguindo a spec atual, mas ainda não consegui testar com a API ligada de
-verdade.** Se você testar, abre uma issue contando como foi 🙏
+A API é experimental (Chromium, flag `CanvasDrawElement`). Onde não existir, ou em caso de erro, o componente volta ao snapshot. Neste repositório testamos com `--enable-blink-features=CanvasDrawElement`: `requestPaint`, `texElementSubImage2D` e upload funcionaram; o atributo legado `layoutsubtree` foi removido do código.
 
 ## Como funciona
 
-1. **Captura** — o palco vira textura (um `foreignObject` SVG rasterizado pelo navegador), com mipmaps e filtro
-   anisotrópico. A própria lente fica de fora.
-2. **Traçado** — um fragment shader modela uma cúpula de vidro sobre o conteúdo. Pra cada pixel ele refrata o raio no
-   topo curvo, de novo na base plana, e segue até o conteúdo. O centro é normalizado, então `magnification` é exato; a
-   borda dobra, comprime e por fim inverte a imagem.
-3. **Dispersão** — onde as cores se separam, o raio é traçado em vários comprimentos de onda e recombinado.
-4. **Luz** — Fresnel, brilho especular e sombra projetada, tudo a partir das mesmas normais.
+1. **Captura:** o palco vira textura (clone DOM via SVG `foreignObject` no snapshot, ou compositor no html-in-canvas), com mipmaps.
+2. **Shader:** traço de raio por pixel no domo; centro com `magnification` exato; borda com compressão e inversão.
+3. **Dispersão:** múltiplos comprimentos de onda só onde há separação de cor.
+4. **Movimento:** apenas uniforms mudam; a textura atualiza em mutações, fim de transições, fontes e tema.
 
-Mexer a lente só troca *uniforms*. A textura é atualizada quando o DOM muda, quando transições terminam, quando fontes
-carregam e quando o tema troca — com capturas agrupadas, pausadas fora da tela e limitadas durante rajadas.
+## Performance (Chrome, referência)
 
-## Performance
-
-Medido no Chrome, RTX 2080 Ti, tela 1×:
-
-| cenário | resultado |
+| Cenário | Resultado típico |
 | --- | --- |
-| arrastar a lente | 60 fps, pior frame ~17 ms |
-| shader (lente de ~820 px) | ~0,4 ms de GPU |
-| captura do conteúdo | ~13 ms (só as propriedades de estilo visuais são clonadas) |
-| arrastar um adesivo sob a lente | 60 fps, a lente atualiza 10–15×/s (`captureBudget`) |
+| Arrastar lente | ~60 fps |
+| Shader (~820 px) | ~0,4 ms GPU |
+| Captura snapshot | ~13 ms (clone só estilos visuais) |
+| Conteúdo em movimento sob a lente | lente 10 a 15 Hz com `captureBudget` 0.3 |
 
-Pixels fora do vidro não gastam nada, e a dispersão só é calculada onde as cores realmente se separam. Se você tem um
-palco enorme, `quality` mais baixo ajuda.
+## Limitações
 
-## Limitações (sendo sincero)
+- Lente circular apenas (sem formato pílula).
+- Snapshot: animações contínuas sem mudança de DOM precisam de `refreshInterval` ou `ref.refresh()`.
+- Imagens cross-origin precisam de CORS na captura.
+- Sem WebGL2: conteúdo normal, `onError` dispara, lente oculta.
 
-- A lente é **circular**. Formas de pílula/retângulo arredondado (tipo botão do iOS) ainda não existem.
-- No modo snapshot, quando o conteúdo sob a lente se mexe, a lente atualiza ~10–15×/s (o resto da página segue a 60 fps).
-  Pra acompanhar quadro a quadro, só o modo `html-in-canvas`.
-- No modo snapshot, conteúdo que muda sem mexer no DOM (vídeo, `<canvas>`, animação CSS infinita) precisa de
-  `refreshInterval` ou `ref.refresh()`.
-- Imagens de outra origem precisam de CORS pra aparecer na captura.
-- Sem WebGL2 a lente não aparece — o conteúdo renderiza normal e `onError` dispara.
+## Documentação e playground
 
-## Documentação
-
-**👉 [lenderson00.github.io/react-glass-lens](https://lenderson00.github.io/react-glass-lens/)** — docs completas,
-demo ao vivo e um playground com sliders e gerador de código. Pra rodar localmente:
+**[lenderson00.github.io/react-glass-lens](https://lenderson00.github.io/react-glass-lens/)** (docs, demos, playground com código exportável)
 
 ```sh
 git clone https://github.com/lenderson00/react-glass-lens.git
@@ -168,38 +137,25 @@ npm install
 npm run dev
 ```
 
-Abra http://localhost:5199. Rotas: `#/` visão geral · `#/docs` documentação · `#/playground` playground.
+Servidor local: http://localhost:5199 (`#/`, `#/docs`, `#/playground`).
 
-O playground gera o JSX com só o que difere do padrão — mexe nos sliders, copia, cola no seu projeto.
-
-## Estrutura do repositório
+## Repositório
 
 ```
-packages/react-glass-lens/   o pacote npm (código, build, README do npm)
-src/
-  site/                      site de documentação (Vite + React)
-  playground/                playground interativo
+packages/react-glass-lens/   pacote npm
+src/site/                    site Vite
+src/playground/              playground
 ```
 
-O site importa o pacote **direto do código-fonte**, então qualquer mudança na lib aparece na hora.
-
-| comando | o que faz |
+| Comando | Ação |
 | --- | --- |
-| `npm run dev` | site + playground em http://localhost:5199 |
-| `npm run build` | build da lib (`packages/react-glass-lens/dist`) e do site (`dist/`) |
-| `npm run build:lib` | só a lib: ESM, CJS, source maps e `.d.ts` |
-| `npm run typecheck` | typecheck do site e da lib |
-| `npm run pack:lib` | `npm pack --dry-run` — o que seria publicado |
+| `npm run dev` | Site local |
+| `npm run build` | Lib + site |
+| `npm run typecheck` | Typecheck |
 
 ## Contribuindo
 
-Issues e PRs são bem-vindos. Ajuda especialmente:
-
-- testar o modo `html-in-canvas` em um Chrome com a API ligada;
-- testar em GPUs fracas / mobile e contar o FPS (a aba **Render** do playground mostra);
-- formas de lente além do círculo.
-
-Antes de abrir PR: `npm run typecheck && npm run build`.
+Issues e PRs são bem-vindos. Antes de abrir PR: `npm run typecheck && npm run build`.
 
 ## Licença
 

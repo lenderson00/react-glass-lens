@@ -28,7 +28,7 @@ export interface LensStageProps extends Partial<LensConfig> {
   children: ReactNode;
   /**
    * `'snapshot'` (default): clone the DOM into a texture when it changes — works everywhere.
-   * `'html-in-canvas'`: the stage becomes a `<canvas content="drawable">` (WICG proposal) and
+   * `'html-in-canvas'`: the stage becomes a `<canvas content="drawable">` (WICG) and
    * the browser streams the live content to the GPU every frame; falls back to snapshot
    * where the API is missing. `'auto'` is the same as `'html-in-canvas'`.
    */
