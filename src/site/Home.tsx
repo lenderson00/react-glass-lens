@@ -1,4 +1,5 @@
 import { LensStage } from 'react-glass-lens';
+import { useViewportStage } from '../lib/useViewportStage';
 import { Scene, initialStickers } from '../playground/Scene';
 import { Code, InstallPill } from './Code';
 import { PresetDemo } from './PresetDemo';
@@ -40,6 +41,7 @@ const FEATURES = [
 
 export function Home() {
   const { stickers, draggingId, onStickerPointerDown } = useStickers(initialStickers);
+  const { radius: viewportRadius, stickerScale } = useViewportStage(258);
   return (
     <>
       <section className="hero">
@@ -65,8 +67,19 @@ export function Home() {
           <InstallPill />
         </div>
 
-        <LensStage className="hero-stage" defaultPosition={{ x: '50%', y: '52%' }} aria-label="Demo lens. Drag it, or use the arrow keys.">
-          <Scene heading={false} stickers={stickers} draggingId={draggingId} onStickerPointerDown={onStickerPointerDown} />
+        <LensStage
+          className="hero-stage"
+          radius={viewportRadius}
+          defaultPosition={{ x: '50%', y: '52%' }}
+          aria-label="Demo lens. Drag it, or use the arrow keys."
+        >
+          <Scene
+            heading={false}
+            stickers={stickers}
+            draggingId={draggingId}
+            onStickerPointerDown={onStickerPointerDown}
+            layoutScale={stickerScale}
+          />
         </LensStage>
         <p className="hero-hint">Drag the glass. Flick it. Drag the stickers under it.</p>
       </section>

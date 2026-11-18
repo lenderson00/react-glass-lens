@@ -1,7 +1,7 @@
 {
   "name": "react-glass-lens",
   "version": "0.1.0",
-  "description": "A draggable WebGL glass lens for React that really refracts the DOM under it: magnification, chromatic dispersion, Fresnel and soft shadows.",
+  "description": "Draggable WebGL2 glass lens for React with spectral refraction, presets, and HTML-in-Canvas capture.",
   "keywords": [
     "react",
     "lens",
@@ -22,7 +22,7 @@
     "url": "git+https://github.com/lenderson00/react-glass-lens.git",
     "directory": "packages/react-glass-lens"
   },
-  "homepage": "https://github.com/lenderson00/react-glass-lens#readme",
+  "homepage": "https://lenderson00.github.io/react-glass-lens/",
   "bugs": {
     "url": "https://github.com/lenderson00/react-glass-lens/issues"
   },

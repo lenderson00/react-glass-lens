@@ -83,15 +83,18 @@ export function supportsWebGL2() {
 }
 
 /**
- * HTML-in-Canvas (WICG proposal, Chromium behind a flag at the time of writing):
- * `<canvas content="drawable">` + `requestPaint()` + `texElementSubImage2D()`.
+ * HTML-in-Canvas (WICG): `content="drawable"` canvas, `drawable` descendants,
+ * `requestPaint()` / `paint` event, and `texElementSubImage2D()` on WebGL.
  */
 export function supportsHtmlInCanvas() {
   if (typeof window === 'undefined' || typeof WebGL2RenderingContext === 'undefined') return false;
   const gl = WebGL2RenderingContext.prototype as unknown as Record<string, unknown>;
   const canvas = HTMLCanvasElement.prototype as unknown as Record<string, unknown>;
-  return (
+  const hasTextureUpload =
+    typeof gl.texElementSubImage2D === 'function' || typeof gl.texElementImage2D === 'function';
+  const hasPaintLoop =
     typeof canvas.requestPaint === 'function' &&
-    (typeof gl.texElementSubImage2D === 'function' || typeof gl.texElementImage2D === 'function')
-  );
+    (typeof canvas.getElementImageDefaultSize === 'function' ||
+      typeof canvas.updateElementGeometry === 'function');
+  return hasTextureUpload && hasPaintLoop;
 }

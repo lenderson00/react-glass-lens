@@ -13,11 +13,10 @@ import { LensRenderer } from './renderer';
 
 /**
  * HTML-in-Canvas mode (WICG proposal): the stage itself is a
- * `<canvas content="drawable">` whose children are laid out and hit-tested as
- * usual, but painted by us. Every frame the browser hands the compositor's
- * snapshot of the content straight to a WebGL texture — no DOM cloning, no
- * main-thread capture — so the lens stays in sync with animations, video and
- * dragging at full frame rate.
+ * `<canvas content="drawable">` with `drawable` descendants (WICG). On each
+ * `paint` event we upload the compositor snapshot via `texElementSubImage2D`
+ * and sync geometry with `updateElementGeometry`, so video and CSS animation
+ * stay live without DOM cloning.
  */
 export interface HtmlCanvasStageLayerProps extends FrameInputs {
   children: ReactNode;
@@ -159,9 +158,7 @@ export const HtmlCanvasStageLayer = forwardRef<LensLayerHandle, HtmlCanvasStageL
       },
     }));
 
-    // `content="drawable"` is the current attribute; `layoutsubtree` the earlier
-    // one — both are set so either generation of the API picks it up.
-    const canvasAttrs = { content: 'drawable', layoutsubtree: '' } as Record<string, string>;
+    const canvasAttrs = { content: 'drawable' } as Record<string, string>;
     const drawableAttrs = { drawable: '' } as Record<string, string>;
 
     return (

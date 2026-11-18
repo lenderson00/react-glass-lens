@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isMobileViewport } from '../lib/viewport';
 
 /** Frames per second and worst frame (ms) over the last half second. */
 function useFps(active: boolean) {
@@ -181,7 +182,16 @@ interface ControlPanelProps {
 }
 
 export function ControlPanel(p: ControlPanelProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => isMobileViewport());
+  const [isMobile, setIsMobile] = useState(() => isMobileViewport());
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 720px)');
+    const onChange = () => setIsMobile(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
   const [tab, setTab] = useState<'optics' | 'light' | 'render' | 'code'>('optics');
   const [copied, setCopied] = useState(false);
   const perf = useFps(tab === 'render' && !collapsed);
@@ -197,13 +207,27 @@ export function ControlPanel(p: ControlPanelProps) {
   };
 
   return (
-    <aside className={`cp${collapsed ? ' is-collapsed' : ''}`} aria-label="Lens controls">
+    <aside
+      className={`cp${collapsed ? ' is-collapsed' : ''}${isMobile ? ' is-sheet' : ''}`}
+      aria-label="Lens controls"
+      aria-expanded={!collapsed}
+    >
       <div className="cp-head">
         <span className="cp-title">Lens</span>
-        <button className="cp-icon" onClick={() => setCollapsed((c) => !c)} aria-label={collapsed ? 'Expand' : 'Collapse'}>
-          {collapsed ? '▾' : '▴'}
+        <button
+          type="button"
+          className="cp-icon"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? 'Expand controls' : 'Collapse controls'}
+        >
+          {collapsed ? '▴' : '▾'}
         </button>
       </div>
+      {isMobile && collapsed && (
+        <button type="button" className="cp-sheet-hint" onClick={() => setCollapsed(false)}>
+          Tap to tune the lens
+        </button>
+      )}
 
       {!collapsed && (
         <>

@@ -1,14 +1,10 @@
 # react-glass-lens
 
-A draggable glass lens for React that **really refracts** the DOM under it — per-pixel ray tracing in WebGL2, spectral
-chromatic dispersion, a clean rim and soft shadows.
+Draggable WebGL2 glass lens for React. Per-pixel refraction over your DOM, chromatic dispersion, Fresnel rim, and optional live capture through the HTML-in-Canvas proposal.
 
-- **Real refraction** — Snell's law at the curved top and the flat bottom of a glass dome; the rim bends, compresses and
-  finally inverts the image like a ball lens.
-- **Any React content** — text, images, components. Rendered once; state, focus and clicks work as usual.
-- **60 fps motion** — moving the lens is one draw call. Drag, flick with inertia, follow the cursor or drive it from code.
-- **Accessible** — keyboard movable with a visible focus ring, respects `prefers-reduced-motion`.
-- **Typed & small** — TypeScript types, ~13 kB gzipped, ESM + CommonJS, one runtime dependency.
+**[Live demo](https://lenderson00.github.io/react-glass-lens/)**
+
+![Lens drag over crystal, liquid, and orb presets](https://raw.githubusercontent.com/lenderson00/react-glass-lens/main/docs/assets/demo.gif)
 
 ## Install
 
@@ -16,7 +12,7 @@ chromatic dispersion, a clean rim and soft shadows.
 npm i react-glass-lens
 ```
 
-React 18 or 19 is a peer dependency.
+React 18 or 19 (peer dependency).
 
 ## Usage
 
@@ -32,7 +28,7 @@ export function Hero() {
 }
 ```
 
-The stage is a `position: relative` block — give it a size. Tune it with props or start from a preset:
+`LensStage` is a `position: relative` wrapper. Size the stage, then tune props or a preset:
 
 ```tsx
 import { LensStage, lensPresets } from 'react-glass-lens';
@@ -42,54 +38,61 @@ import { LensStage, lensPresets } from 'react-glass-lens';
 </LensStage>;
 ```
 
-Precedence: defaults < `config` < individual props.
+Precedence: built-in defaults, then `config`, then individual props.
+
+## Presets
+
+| Preset | Notes |
+| --- | --- |
+| `crystal` | Default: magnification, curved rim, dispersion |
+| `orb` | Ball lens inversion near the edge |
+| `magnifier` | Flat center, short edge |
+| `droplet` | Water-like IOR |
+| `subtle` | Low-strength refraction |
+| `liquid` | UI glass (Liquid Glass inspired; no Apple affiliation) |
 
 ## Optics props (`LensConfig`)
 
-| prop            | default | description                                                         |
-| --------------- | ------- | ------------------------------------------------------------------- |
-| `radius`        | `258`   | Lens radius in CSS px                                               |
-| `magnification` | `1.75`  | Zoom at the centre (exact)                                          |
-| `ior`           | `1.52`  | Index of refraction (1.33 water, 1.52 glass, 2.4 diamond)           |
-| `aberration`    | `0.054` | Chromatic dispersion: IOR spread between red and blue (`0` = off)   |
-| `thickness`     | `0.6`   | Dome height ÷ radius (`1` = hemisphere)                             |
-| `bevelStart`    | `0.33`  | 0–1, where the curvature starts; inside it the glass is flat        |
-| `oblateness`    | `0.3`   | 0 = sphere, 1 = flat puck with a steep edge                         |
-| `refraction`    | `0.3`   | Glass → content gap ÷ radius; bigger = stronger rim warp/inversion  |
-| `specular`      | `0`     | Specular highlight (`0` = clean, reflection-free glass)             |
-| `rim`           | `0.2`   | Fresnel reflection on the rim                                       |
-| `shadow`        | `0.45`  | Cast shadow and glass haze                                          |
-| `lightAngle`    | `-35`   | Light direction in degrees (0 = top, 90 = right)                    |
-| `frost`         | `0`     | 0–1 frosted glass: blurs what is seen through the lens              |
+| Prop | Default | Description |
+| --- | --- | --- |
+| `radius` | `258` | Lens radius in CSS px |
+| `magnification` | `1.75` | Center zoom |
+| `ior` | `1.52` | Index of refraction |
+| `aberration` | `0.054` | Chromatic spread (`0` off) |
+| `thickness` | `0.6` | Dome height / radius |
+| `bevelStart` | `0.33` | Where curvature starts (0 to 1) |
+| `oblateness` | `0.3` | 0 sphere, 1 flat puck |
+| `refraction` | `0.3` | Glass to content gap / radius |
+| `specular` | `0` | Specular highlight |
+| `rim` | `0.2` | Fresnel on the edge |
+| `shadow` | `0.45` | Cast shadow / haze |
+| `lightAngle` | `-35` | Light direction (degrees) |
+| `frost` | `0` | Frosted blur through the lens |
 
-## Behaviour & rendering props
+## Behavior and rendering
 
-| prop                         | default                  | description                                                     |
-| ---------------------------- | ------------------------ | --------------------------------------------------------------- |
-| `config`                     | —                        | `Partial<LensConfig>`, e.g. a preset                            |
-| `capture`                    | `'snapshot'`             | `'snapshot'` · `'html-in-canvas'` (live, falls back) · `'auto'` |
-| `open`                       | `true`                   | Show / hide with a spring                                       |
-| `mode`                       | `'drag'`                 | `'drag'` · `'follow'` (tracks the pointer) · `'static'`         |
-| `defaultPosition`            | `{ x: '50%', y: '50%' }` | Initial centre, px or `%` of the stage                          |
-| `position`                   | —                        | Controlled centre `{ x, y }` in px                              |
-| `smoothing`                  | `0.75`                   | 0 sticks to the pointer, 0.9 is floaty                          |
-| `inertia`                    | `true`                   | Glide after a flick                                             |
-| `bounded`                    | `true`                   | Keep the centre inside the stage                                |
-| `pressScale`                 | `1.04`                   | Scale feedback while pressed                                    |
-| `quality`                    | `'auto'`                 | Texture resolution × DPR (auto follows magnification, ~8 MP cap)|
-| `spectralSamples`            | `8`                      | Max wavelengths for dispersion (3–24)                           |
-| `maxPixelRatio`              | `2`                      | Cap for the lens canvas DPR                                     |
-| `background`                 | auto                     | Colour outside the stage / before the first capture             |
-| `autoRefresh`                | `true`                   | Recapture when the DOM inside the stage changes                 |
-| `refreshInterval`            | `0`                      | Also recapture every N ms (video, canvas, CSS loops)            |
-| `captureBudget`              | `0.3`                    | Snapshot mode: max share of main-thread time recaptures may use while content keeps changing (0.05–0.9) |
-| `captureStyles`              | `'fast'`                 | `'fast'` clones only visual style props (~4× cheaper); `'full'` clones all |
-| `onPositionChange`           | —                        | `(p) => void` while moving                                      |
-| `onDragStart` / `onDragEnd`  | —                        | `(p) => void`                                                   |
-| `onCapture`                  | —                        | `({ ms, width, height, method }) => void` after a capture       |
-| `onError`                    | —                        | WebGL2 unavailable or capture failed — the lens hides           |
-| `className`, `style`         | —                        | Stage element                                                   |
-| `lensClassName`, `lensStyle` | —                        | Lens hit area                                                   |
+| Prop | Default | Description |
+| --- | --- | --- |
+| `config` | `n/a` | `Partial<LensConfig>` preset overlay |
+| `capture` | `'snapshot'` | `snapshot`, `html-in-canvas`, or `auto` |
+| `open` | `true` | Show/hide with spring |
+| `mode` | `'drag'` | `drag`, `follow`, or `static` |
+| `defaultPosition` | center | Initial position (`%` or px) |
+| `position` | `n/a` | Controlled center in px |
+| `smoothing` | `0.75` | Pointer follow smoothing |
+| `inertia` | `true` | Flick glide |
+| `bounded` | `true` | Keep center inside stage |
+| `pressScale` | `1.04` | Press feedback scale |
+| `quality` | `'auto'` | Texture resolution cap |
+| `spectralSamples` | `8` | Dispersion samples (3 to 24) |
+| `maxPixelRatio` | `2` | Lens canvas DPR cap |
+| `background` | auto | Stage backdrop color |
+| `autoRefresh` | `true` | Recapture on DOM changes |
+| `refreshInterval` | `0` | Periodic recapture (ms) |
+| `captureBudget` | `0.3` | Snapshot CPU budget while content moves |
+| `captureStyles` | `'fast'` | `fast` visual-only clone or `full` |
+| `onCapture` | `n/a` | After each capture |
+| `onError` | `n/a` | WebGL or capture failure |
 
 ## Imperative handle
 
@@ -98,50 +101,46 @@ const lens = useRef<LensStageHandle>(null);
 
 <LensStage ref={lens}>…</LensStage>;
 
-lens.current?.moveTo(320, 180); // animated; { immediate: true } to jump
+lens.current?.moveTo(320, 180);
 lens.current?.center();
 lens.current?.getPosition();
-lens.current?.refresh(); // recapture now
-lens.current?.capture; // 'snapshot' | 'html-in-canvas'
+lens.current?.refresh();
+lens.current?.capture; // active method
 ```
 
-## Presets
-
-`lensPresets.crystal` (default), `orb`, `magnifier`, `droplet`, `subtle`, and `liquid` — UI glass in the spirit of
-Apple's Liquid Glass: no zoom, a clear centre, refraction only in a thin rounded edge, a bright rim and a touch of frost.
-
 ## HTML-in-Canvas (experimental)
+
+[WICG HTML-in-Canvas](https://github.com/WICG/html-in-canvas) defines:
+
+- `<canvas content="drawable">` with `drawable` on painted descendants
+- `requestPaint()` and the `paint` event (`changedElements`)
+- `texElementSubImage2D()` on WebGL for live compositor snapshots
+- `updateElementGeometry()` for hit testing and accessibility geometry
 
 ```tsx
 import { LensStage, supportsHtmlInCanvas } from 'react-glass-lens';
 
 <LensStage capture="html-in-canvas">
-  <VideoWall /> {/* video, canvas and CSS animations stay live under the glass */}
+  <VideoWall />
 </LensStage>;
+
+supportsHtmlInCanvas();
 ```
 
-With the [HTML-in-Canvas](https://github.com/WICG/html-in-canvas) proposal the stage becomes a
-`<canvas content="drawable">`: children are laid out and hit-tested as usual, and the browser streams their live pixels
-to WebGL every frame — no DOM cloning, no recapture delay. The API is experimental (Chromium, behind a flag at the time
-of writing); everywhere else, or if it throws, the lens falls back to snapshot capture. `supportsHtmlInCanvas()` exposes
-the feature detection.
+Experimental in Chromium (`CanvasDrawElement`). Falls back to DOM snapshot elsewhere or on error. `supportsHtmlInCanvas()` checks `requestPaint`, geometry helpers, and `texElementSubImage2D`.
 
 ## How it works
 
-1. The stage is captured into a texture (an SVG `foreignObject` rasterised by the browser) with mipmaps and
-   anisotropic filtering. The lens itself is excluded; add `data-lens-ignore` to exclude anything else.
-2. A fragment shader traces a ray per pixel through the dome and onto the content. Dispersion re-traces a few
-   wavelengths only where colours actually separate; pixels outside the glass skip all lens work.
-3. The texture is refreshed automatically on DOM mutations, finished transitions/animations, font loads and theme
-   changes. Captures are coalesced, throttled during bursts and paused while the stage is off-screen or the tab is
-   hidden.
+1. Stage content becomes a GPU texture (DOM snapshot or html-in-canvas).
+2. A fragment shader traces rays through a glass dome onto that texture.
+3. Dispersion retraces wavelengths only where channels diverge.
+4. Lens motion updates uniforms; capture runs on DOM/theme changes (coalesced in snapshot mode).
 
 ## Notes
 
-- Capturing clones the stage DOM on the main thread (~13 ms for a typical hero; only visual style properties are
-  cloned). Smaller DOM = faster refresh, and `captureBudget` keeps the page smooth while content changes.
-- Cross-origin images need CORS to appear in the capture.
-- Without WebGL2, `onError` fires and the content renders normally without the lens.
+- Snapshot capture clones the stage on the main thread (~13 ms typical hero). Tune `captureBudget` and DOM size.
+- Cross-origin images need CORS headers in snapshot mode.
+- Without WebGL2, content still renders; the lens hides and `onError` runs.
 
 ## License
 

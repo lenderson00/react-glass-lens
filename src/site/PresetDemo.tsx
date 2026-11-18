@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { LensStage, lensPresets, type LensPresetName } from 'react-glass-lens';
+import { useViewportStage } from '../lib/useViewportStage';
 
 export const PRESET_NAMES: Record<LensPresetName, string> = {
   crystal: 'Crystal',
@@ -37,6 +38,8 @@ export function Specimen() {
 export function PresetDemo({ height = 380 }: { height?: number }) {
   const [preset, setPreset] = useState<LensPresetName>('crystal');
   const cfg = lensPresets[preset];
+  const { radius: viewportRadius } = useViewportStage(cfg.radius);
+  const lensRadius = Math.min(cfg.radius, height * 0.36, viewportRadius);
   return (
     <div className="preset-demo">
       <div className="chips" role="radiogroup" aria-label="Preset">
@@ -50,8 +53,8 @@ export function PresetDemo({ height = 380 }: { height?: number }) {
         className="demo-stage"
         style={{ height }}
         config={cfg}
-        radius={Math.min(cfg.radius, height * 0.36)}
-        defaultPosition={{ x: '30%', y: '46%' }}
+        radius={lensRadius}
+        defaultPosition={{ x: '50%', y: '50%' }}
         aria-label={`${PRESET_NAMES[preset]} lens. Use the arrow keys to move it.`}
       >
         <Specimen />

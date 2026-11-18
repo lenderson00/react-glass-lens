@@ -85,7 +85,7 @@ export function Docs() {
   const active = useActiveSection();
   return (
     <div className="docs">
-      <aside className="toc" aria-label="On this page">
+      <aside className="toc toc-desktop" aria-label="On this page">
         <span className="toc-title">Documentation</span>
         <nav>
           {SECTIONS.map(([id, label]) => (
@@ -95,6 +95,18 @@ export function Docs() {
           ))}
         </nav>
       </aside>
+
+      <div className="docs-main">
+        <div className="toc-rail-wrap" aria-hidden={false}>
+          <span className="toc-rail-label">On this page</span>
+          <nav className="toc-rail" aria-label="On this page">
+            {SECTIONS.map(([id, label]) => (
+              <a key={id} href={href('docs', id)} className={active === id ? 'on' : ''}>
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
 
       <article className="prose">
         <section id="introduction">
@@ -215,8 +227,8 @@ supportsHtmlInCanvas(); // feature detection
           <ul>
             <li>The lens follows animations, video and dragging at full frame rate — no recapture, no stale frames.</li>
             <li>
-              The API is experimental. At the time of writing it ships in Chromium behind a flag; in every other browser
-              the lens silently uses snapshot capture. If the API throws, it also falls back.
+              The API is experimental (Chromium, <code>CanvasDrawElement</code>). Other browsers and failures use snapshot
+              capture automatically.
             </li>
             <li>
               In this mode the canvas paints the content itself. Text selection and native scrolling inside the stage
@@ -339,6 +351,7 @@ const [pos, setPos] = useState({ x: 200, y: 160 });
           </ul>
         </section>
       </article>
+      </div>
     </div>
   );
 }

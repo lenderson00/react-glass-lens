@@ -1,8 +1,10 @@
+import { useEffect, useState } from 'react';
 import { Playground } from '../playground/App';
 import { Docs } from './Docs';
 import { Home } from './Home';
 import { href, useRoute, type Route } from './router';
 import { ThemeToggle, useTheme } from './theme';
+import { useHeaderScroll } from './useHeaderScroll';
 
 const NAV: [Route, string][] = [
   ['home', 'Overview'],
@@ -14,8 +16,32 @@ const NPM_URL = 'https://www.npmjs.com/package/react-glass-lens';
 
 function Header({ route }: { route: Route }) {
   const [theme, setTheme] = useTheme();
+  const scrollHide = useHeaderScroll(route !== 'playground');
+  const [playNavOpen, setPlayNavOpen] = useState(true);
+
+  useEffect(() => {
+    if (route !== 'playground') return;
+    const mq = window.matchMedia('(max-width: 720px)');
+    const apply = () => setPlayNavOpen(!mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, [route]);
+
+  const overlay = route === 'playground';
+  const headerClass = [
+    'site-header',
+    overlay ? 'overlay' : '',
+    scrollHide.hidden ? 'is-hidden' : '',
+    scrollHide.compact ? 'is-compact' : '',
+    overlay && !playNavOpen ? 'nav-collapsed' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <header className={`site-header${route === 'playground' ? ' overlay' : ''}`}>
+  <>
+    <header className={headerClass}>
       <a className="brand" href={href('home')}>
         <span className="brand-dot" aria-hidden /> react-glass-lens
       </a>
@@ -30,9 +56,31 @@ function Header({ route }: { route: Route }) {
         <a className="npm" href={NPM_URL} target="_blank" rel="noreferrer">
           npm
         </a>
+        {overlay && (
+          <button
+            type="button"
+            className="nav-toggle"
+            aria-expanded={playNavOpen}
+            aria-label={playNavOpen ? 'Hide navigation' : 'Show navigation'}
+            onClick={() => setPlayNavOpen((o) => !o)}
+          >
+            {playNavOpen ? '▴' : '☰'}
+          </button>
+        )}
         <ThemeToggle theme={theme} onChange={setTheme} />
       </div>
     </header>
+    {overlay && !playNavOpen && (
+      <button
+        type="button"
+        className="nav-fab"
+        aria-label="Show navigation"
+        onClick={() => setPlayNavOpen(true)}
+      >
+        ☰
+      </button>
+    )}
+  </>
   );
 }
 

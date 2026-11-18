@@ -10,6 +10,7 @@ import {
   type LensPresetName,
   type LensStageHandle,
 } from 'react-glass-lens';
+import { useViewportStage } from '../lib/useViewportStage';
 import { ControlPanel } from './ControlPanel';
 import { Scene, initialStickers, type StickerState } from './Scene';
 
@@ -114,6 +115,8 @@ export function Playground() {
   const lens = useRef<LensStageHandle>(null);
   const stickersRef = useRef(stickers);
   stickersRef.current = stickers;
+  const { radius: viewportRadius, stickerScale } = useViewportStage(config.radius);
+  const lensRadius = Math.min(config.radius, viewportRadius);
 
   const configRef = useRef(config);
   configRef.current = config;
@@ -194,6 +197,7 @@ export function Playground() {
         ref={lens}
         className="stage"
         config={config}
+        radius={lensRadius}
         open={open}
         mode={mode}
         smoothing={smoothing}
@@ -204,9 +208,14 @@ export function Playground() {
         capture={capture}
         captureBudget={captureBudget}
         onError={() => setLensError(true)}
-        defaultPosition={{ x: '50%', y: '60%' }}
+        defaultPosition={{ x: '50%', y: '50%' }}
       >
-        <Scene stickers={stickers} draggingId={draggingId} onStickerPointerDown={onStickerPointerDown} />
+        <Scene
+          stickers={stickers}
+          draggingId={draggingId}
+          onStickerPointerDown={onStickerPointerDown}
+          layoutScale={stickerScale}
+        />
       </LensStage>
 
       <ControlPanel

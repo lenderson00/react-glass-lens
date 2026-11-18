@@ -39,6 +39,8 @@
 html,
 body {
   margin: 0;
+  overflow-x: clip;
+  max-width: 100%;
 }
 
 body {
@@ -58,6 +60,8 @@ button {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 .stage {
@@ -65,6 +69,7 @@ button {
   inset: 0;
   overflow: hidden;
   background: var(--bg);
+  touch-action: none;
 }
 
 /* ---------------- scene ---------------- */
@@ -80,7 +85,8 @@ button {
   top: 22%;
   transform: translateX(-50%);
   text-align: center;
-  white-space: nowrap;
+  max-width: min(92vw, 420px);
+  padding: 0 12px;
 }
 
 .scene-head .eyebrow {
@@ -106,9 +112,11 @@ button {
 .stickers {
   position: absolute;
   left: 50%;
-  top: 60%;
+  top: 58%;
   width: 0;
   height: 0;
+  transform: scale(var(--scene-scale, 1));
+  transform-origin: center center;
 }
 
 .sticker {
@@ -644,19 +652,63 @@ button {
 }
 
 @media (max-width: 720px) {
+  .scene-head {
+    top: 14%;
+  }
+  .scene-head h1 {
+    font-size: clamp(28px, 9.5vw, 40px);
+  }
+  .scene-head p {
+    font-size: 13px;
+  }
+  .stickers {
+    top: 54%;
+  }
   .cp {
+    position: fixed;
     top: auto;
-    bottom: 70px;
-    left: 12px;
-    right: 12px;
+    bottom: 0;
+    left: 0;
+    right: 0;
     width: auto;
-    max-height: 46%;
+    max-height: min(68dvh, 560px);
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -16px 48px rgba(0, 0, 0, 0.35);
+    transition: max-height 220ms ease, transform 220ms ease;
+  }
+  .cp.is-sheet.is-collapsed {
+    max-height: 52px;
+    overflow: hidden;
+  }
+  .cp.is-sheet.is-collapsed .cp-head {
+    border-bottom: 0;
+  }
+  .cp-sheet-hint {
+    position: absolute;
+    left: 50%;
+    bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    border: 0;
+    background: none;
+    color: var(--panel-muted);
+    font-size: 11px;
+    padding: 4px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dock {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 58px);
+    z-index: 25;
+  }
+  .app.playground:has(.cp.is-sheet:not(.is-collapsed)) .dock {
+    top: calc(env(safe-area-inset-top, 0px) + 52px);
+    bottom: auto;
+    transform: translateX(-50%);
   }
   .theme {
     margin-right: 0;
-  }
-  .stickers {
-    transform: scale(0.6);
   }
 }
 
