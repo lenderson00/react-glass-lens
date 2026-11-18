@@ -82,6 +82,8 @@ Precedence: defaults < `config` < individual props.
 | `background`                 | auto                     | Colour outside the stage / before the first capture             |
 | `autoRefresh`                | `true`                   | Recapture when the DOM inside the stage changes                 |
 | `refreshInterval`            | `0`                      | Also recapture every N ms (video, canvas, CSS loops)            |
+| `captureBudget`              | `0.3`                    | Snapshot mode: max share of main-thread time recaptures may use while content keeps changing (0.05–0.9) |
+| `captureStyles`              | `'fast'`                 | `'fast'` clones only visual style props (~4× cheaper); `'full'` clones all |
 | `onPositionChange`           | —                        | `(p) => void` while moving                                      |
 | `onDragStart` / `onDragEnd`  | —                        | `(p) => void`                                                   |
 | `onCapture`                  | —                        | `({ ms, width, height, method }) => void` after a capture       |
@@ -136,7 +138,8 @@ the feature detection.
 
 ## Notes
 
-- Capturing clones the stage DOM on the main thread (~35–50 ms for a typical hero). Smaller DOM = faster refresh.
+- Capturing clones the stage DOM on the main thread (~13 ms for a typical hero; only visual style properties are
+  cloned). Smaller DOM = faster refresh, and `captureBudget` keeps the page smooth while content changes.
 - Cross-origin images need CORS to appear in the capture.
 - Without WebGL2, `onError` fires and the content renders normally without the lens.
 

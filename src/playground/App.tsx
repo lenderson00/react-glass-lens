@@ -21,6 +21,7 @@ interface CodeExtras {
   spectralSamples: number;
   quality: number | null;
   capture: LensCapture;
+  captureBudget: number;
 }
 
 // ---- playground settings persistence -------------------------------------
@@ -41,6 +42,7 @@ const DEFAULT_SETTINGS: Settings = {
   spectralSamples: 8,
   quality: null,
   capture: 'auto',
+  captureBudget: 0.3,
 };
 
 function loadSettings(): Settings {
@@ -62,6 +64,7 @@ function loadSettings(): Settings {
       spectralSamples: typeof raw.spectralSamples === 'number' ? raw.spectralSamples : 8,
       quality: typeof raw.quality === 'number' ? raw.quality : null,
       capture: raw.capture === 'snapshot' || raw.capture === 'html-in-canvas' ? raw.capture : 'auto',
+      captureBudget: typeof raw.captureBudget === 'number' ? raw.captureBudget : 0.3,
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -70,7 +73,7 @@ function loadSettings(): Settings {
 
 function buildCode(
   config: LensConfig,
-  { open, mode, smoothing, inertia, spectralSamples, quality, capture }: CodeExtras,
+  { open, mode, smoothing, inertia, spectralSamples, quality, capture, captureBudget }: CodeExtras,
 ) {
   const fmt = (v: number) => String(Math.round(v * 1000) / 1000);
   const lines = (Object.keys(defaultLensConfig) as (keyof LensConfig)[])
@@ -83,6 +86,7 @@ function buildCode(
   if (spectralSamples !== 8) lines.push(`  spectralSamples={${spectralSamples}}`);
   if (quality !== null) lines.push(`  quality={${fmt(quality)}}`);
   if (capture !== 'snapshot') lines.push(`  capture="${capture}"`);
+  if (Math.abs(captureBudget - 0.3) > 1e-9) lines.push(`  captureBudget={${fmt(captureBudget)}}`);
   const props = lines.length ? `\n${lines.join('\n')}\n` : '';
   return `import { LensStage } from 'react-glass-lens';
 
@@ -103,6 +107,7 @@ export function Playground() {
   const [spectralSamples, setSpectralSamples] = useState(saved.spectralSamples);
   const [quality, setQuality] = useState<number | null>(saved.quality);
   const [capture, setCaptureMode] = useState<LensCapture>(saved.capture);
+  const [captureBudget, setCaptureBudget] = useState(saved.captureBudget);
   const [captureInfo, setCaptureInfo] = useState<CaptureInfo | null>(null);
   const [stickers, setStickers] = useState<StickerState[]>(initialStickers);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -155,22 +160,33 @@ export function Playground() {
   }, []);
 
   const code = useMemo(
-    () => buildCode(config, { open, mode, smoothing, inertia, spectralSamples, quality, capture }),
-    [config, open, mode, smoothing, inertia, spectralSamples, quality, capture],
+    () => buildCode(config, { open, mode, smoothing, inertia, spectralSamples, quality, capture, captureBudget }),
+    [config, open, mode, smoothing, inertia, spectralSamples, quality, capture, captureBudget],
   );
 
   // Keep tweaks across reloads.
   useEffect(() => {
     const t = setTimeout(() => {
       try {
-        const data: Settings = { config, preset, open, mode, smoothing, inertia, spectralSamples, quality, capture };
+        const data: Settings = {
+          config,
+          preset,
+          open,
+          mode,
+          smoothing,
+          inertia,
+          spectralSamples,
+          quality,
+          capture,
+          captureBudget,
+        };
         localStorage.setItem(STORE_KEY, JSON.stringify(data));
       } catch {
         /* storage unavailable */
       }
     }, 250);
     return () => clearTimeout(t);
-  }, [config, preset, open, mode, smoothing, inertia, spectralSamples, quality, capture]);
+  }, [config, preset, open, mode, smoothing, inertia, spectralSamples, quality, capture, captureBudget]);
 
   return (
     <div className="app playground">
@@ -186,6 +202,7 @@ export function Playground() {
         quality={quality ?? 'auto'}
         onCapture={setCaptureInfo}
         capture={capture}
+        captureBudget={captureBudget}
         onError={() => setLensError(true)}
         defaultPosition={{ x: '50%', y: '60%' }}
       >
@@ -219,6 +236,7 @@ export function Playground() {
           setSpectralSamples(8);
           setQuality(null);
           setCaptureMode('auto');
+          setCaptureBudget(0.3);
           lens.current?.center();
         }}
         onCenter={() => lens.current?.center()}
@@ -226,6 +244,8 @@ export function Playground() {
         lensError={lensError}
         spectralSamples={spectralSamples}
         onSpectralSamplesChange={setSpectralSamples}
+        captureBudget={captureBudget}
+        onCaptureBudgetChange={setCaptureBudget}
         quality={quality ?? 2}
         onQualityChange={setQuality}
         captureMs={captureInfo?.ms ?? null}

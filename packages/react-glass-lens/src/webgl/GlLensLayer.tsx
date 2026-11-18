@@ -15,6 +15,10 @@ export interface GlLensLayerProps extends LensLayerProps {
   spectralSamples: number;
   autoRefresh: boolean;
   refreshInterval: number;
+  /** Max share of main-thread time captures may use during bursts of change. */
+  captureBudget: number;
+  /** `'fast'` (default) or `'full'` style cloning. */
+  captureStyles: 'fast' | 'full';
   onCapture?: (info: CaptureInfo) => void;
   /** Skip spring overshoot (prefers-reduced-motion). */
   reducedMotion: boolean;
@@ -78,6 +82,8 @@ export const GlLensLayer = forwardRef<LensLayerHandle, GlLensLayerProps>(functio
       },
       onError: (err) => live.current.onFallback(err),
     });
+    capture.budget = live.current.captureBudget;
+    capture.setStyles(live.current.captureStyles);
     captureRef.current = capture;
 
     const onLost = (e: Event) => {
@@ -146,6 +152,14 @@ export const GlLensLayer = forwardRef<LensLayerHandle, GlLensLayerProps>(functio
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.background]);
+
+  // Capture throttle (read by the capture loop on every iteration).
+  useEffect(() => {
+    if (captureRef.current) captureRef.current.budget = props.captureBudget;
+  }, [props.captureBudget]);
+  useEffect(() => {
+    captureRef.current?.setStyles(props.captureStyles);
+  }, [props.captureStyles]);
 
   // Recapture on size changes.
   useEffect(() => {

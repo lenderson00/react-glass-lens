@@ -169,6 +169,8 @@ interface ControlPanelProps {
   lensError: boolean;
   spectralSamples: number;
   onSpectralSamplesChange: (v: number) => void;
+  captureBudget: number;
+  onCaptureBudgetChange: (v: number) => void;
   quality: number;
   onQualityChange: (v: number) => void;
   captureMs: number | null;
@@ -302,6 +304,17 @@ export function ControlPanel(p: ControlPanelProps) {
                 digits={0}
                 hint="Wavelengths sampled for dispersion"
                 onChange={p.onSpectralSamplesChange}
+              />
+              <Slider
+                label="Capture Budget"
+                name="captureBudget"
+                value={p.captureBudget}
+                defaultValue={0.3}
+                min={0.1}
+                max={0.9}
+                step={0.05}
+                hint="Share of main-thread time recaptures may use while content keeps changing. Lower = smoother page, laggier lens"
+                onChange={p.onCaptureBudgetChange}
               />
               <Slider
                 label="Quality"

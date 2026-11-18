@@ -70,6 +70,17 @@ export interface LensStageProps extends Partial<LensConfig> {
   autoRefresh?: boolean;
   /** Also recapture every N ms (for canvas/video/CSS animations). Default `0` (off). */
   refreshInterval?: number;
+  /**
+   * Snapshot mode: the max share (0.05–0.9) of main-thread time recaptures may use while the content keeps
+   * changing, e.g. while dragging something under the lens. Lower = smoother page but a laggier lens. Default `0.3`.
+   */
+  captureBudget?: number;
+  /**
+   * Snapshot mode: `'fast'` (default) clones only the style properties that affect appearance — ~4× cheaper
+   * captures, pixel-identical in practice. `'full'` clones every computed property (use it if some exotic CSS
+   * is missing from the lens).
+   */
+  captureStyles?: 'fast' | 'full';
   /** Fires after every content capture. */
   onCapture?: (info: CaptureInfo) => void;
   /** WebGL2 unavailable or the capture failed. The lens is hidden; the content stays. */
@@ -121,6 +132,8 @@ export const LensStage = forwardRef<LensStageHandle, LensStageProps>(function Le
     spectralSamples = 8,
     autoRefresh = true,
     refreshInterval = 0,
+    captureBudget = 0.3,
+    captureStyles = 'fast',
     onCapture,
     onError,
     className,
@@ -503,6 +516,8 @@ export const LensStage = forwardRef<LensStageHandle, LensStageProps>(function Le
           spectralSamples={spectralSamples}
           autoRefresh={autoRefresh}
           refreshInterval={refreshInterval}
+          captureBudget={captureBudget}
+          captureStyles={captureStyles}
           onCapture={onCapture}
           reducedMotion={reducedMotion}
           onFallback={fail}

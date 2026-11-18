@@ -48,6 +48,8 @@ export const renderingProps: PropDoc[] = [
   { name: 'maxPixelRatio', type: 'number', default: '2', description: 'Cap for the lens canvas DPR.' },
   { name: 'background', type: 'string', default: 'auto', description: 'Colour outside the stage / before the first capture. Detected from the stage.' },
   { name: 'autoRefresh', type: 'boolean', default: 'true', description: 'Recapture when the DOM inside the stage changes.' },
+  { name: 'captureBudget', type: 'number', default: '0.3', description: 'Snapshot mode: max share (0.05–0.9) of main-thread time recaptures may use while the content keeps changing, e.g. while dragging something under the lens. Lower = smoother page, laggier lens.' },
+  { name: 'captureStyles', type: "'fast' | 'full'", default: "'fast'", description: "Snapshot mode: `fast` clones only the style properties that affect appearance (~4× cheaper, pixel-identical in practice). `full` clones every computed property — use it if some exotic CSS is missing from the lens." },
   { name: 'refreshInterval', type: 'number', default: '0', description: 'Also recapture every N ms — for canvas, video or infinite CSS animations.' },
 ];
 

@@ -98,6 +98,7 @@ Ordem de precedência: padrões < `config` < props individuais.
 | `frost` | `0` | vidro fosco (0–1) |
 | `mode` | `'drag'` | `'drag'` · `'follow'` · `'static'` |
 | `capture` | `'snapshot'` | `'snapshot'` · `'html-in-canvas'` · `'auto'` |
+| `captureBudget` | `0.3` | quanto da thread principal as recapturas podem usar enquanto o conteúdo muda (menor = página mais fluida) |
 
 A lista completa (com tipos, callbacks e a API por `ref`) está na [documentação](#documentação).
 
@@ -138,7 +139,8 @@ Medido no Chrome, RTX 2080 Ti, tela 1×:
 | --- | --- |
 | arrastar a lente | 60 fps, pior frame ~17 ms |
 | shader (lente de ~820 px) | ~0,4 ms de GPU |
-| captura do conteúdo | ~35–50 ms (uma vez por mudança no DOM) |
+| captura do conteúdo | ~13 ms (só as propriedades de estilo visuais são clonadas) |
+| arrastar um adesivo sob a lente | 60 fps, a lente atualiza 10–15×/s (`captureBudget`) |
 
 Pixels fora do vidro não gastam nada, e a dispersão só é calculada onde as cores realmente se separam. Se você tem um
 palco enorme, `quality` mais baixo ajuda.
@@ -146,6 +148,8 @@ palco enorme, `quality` mais baixo ajuda.
 ## Limitações (sendo sincero)
 
 - A lente é **circular**. Formas de pílula/retângulo arredondado (tipo botão do iOS) ainda não existem.
+- No modo snapshot, quando o conteúdo sob a lente se mexe, a lente atualiza ~10–15×/s (o resto da página segue a 60 fps).
+  Pra acompanhar quadro a quadro, só o modo `html-in-canvas`.
 - No modo snapshot, conteúdo que muda sem mexer no DOM (vídeo, `<canvas>`, animação CSS infinita) precisa de
   `refreshInterval` ou `ref.refresh()`.
 - Imagens de outra origem precisam de CORS pra aparecer na captura.
