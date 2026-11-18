@@ -1,0 +1,35 @@
+{
+  "name": "react-glass-lens-site",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:lib && npm run build:site",
+    "build:lib": "npm run build -w react-glass-lens",
+    "build:site": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b && npm run typecheck -w react-glass-lens",
+    "pack:lib": "npm pack -w react-glass-lens --dry-run"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-glass-lens": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenderson00/react-glass-lens.git"
+  }
+}

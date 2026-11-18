@@ -1,0 +1,59 @@
+{
+  "name": "react-glass-lens",
+  "version": "0.1.0",
+  "description": "A draggable WebGL glass lens for React that really refracts the DOM under it: magnification, chromatic dispersion, Fresnel and soft shadows.",
+  "keywords": [
+    "react",
+    "lens",
+    "glass",
+    "refraction",
+    "magnifier",
+    "webgl",
+    "shader",
+    "chromatic-aberration"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Lenderson Macedo",
+    "url": "https://github.com/lenderson00"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenderson00/react-glass-lens.git",
+    "directory": "packages/react-glass-lens"
+  },
+  "homepage": "https://github.com/lenderson00/react-glass-lens#readme",
+  "bugs": {
+    "url": "https://github.com/lenderson00/react-glass-lens/issues"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "dependencies": {
+    "modern-screenshot": "^4.7.0"
+  }
+}
