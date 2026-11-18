@@ -5,6 +5,7 @@
 **Vidro de verdade pro DOM.**
 Uma lente arrastável que refrata o que o React renderiza embaixo dela — não é blur, não é `scale`, é raio de luz.
 
+[![demo](https://img.shields.io/badge/demo-ao%20vivo-111)](https://lenderson00.github.io/react-glass-lens/)
 [![license](https://img.shields.io/badge/license-MIT-111)](LICENSE)
 ![WebGL2](https://img.shields.io/badge/WebGL2-111)
 ![TypeScript](https://img.shields.io/badge/TypeScript-111)
@@ -157,8 +158,8 @@ palco enorme, `quality` mais baixo ajuda.
 
 ## Documentação
 
-Rode o site localmente — ele tem **docs completas**, **demo ao vivo** e um **playground** com sliders e gerador de
-código:
+**👉 [lenderson00.github.io/react-glass-lens](https://lenderson00.github.io/react-glass-lens/)** — docs completas,
+demo ao vivo e um playground com sliders e gerador de código. Pra rodar localmente:
 
 ```sh
 git clone https://github.com/lenderson00/react-glass-lens.git
